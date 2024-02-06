@@ -1,23 +1,23 @@
-import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
-import java.util.TreeSet;
 
 public class NavigatorImpl implements Navigator {
 
-    private TreeSet<Route> routes;
+    private MyTreeSet<Route> routes;
+
 
     public NavigatorImpl() {
-        this.routes = new TreeSet<>();
+        this.routes = new MyTreeSet<>();
     }
 
     @Override
     public void addRoute(Route route) {
         if (!isRouteExist(route)) {
-            routes.add(route);
+            Node<Route> node = new Node<>(route);
+            routes.add(node.value);
             System.out.println("Маршрут успешно добавлен");
-        }
-        else {
+        } else {
             System.out.println("Маршрут с такими данными уже существует");
         }
     }
@@ -26,7 +26,8 @@ public class NavigatorImpl implements Navigator {
     public void removeRoute(String routeId) {
         for (Route route : routes) {
             if (route.getId().equals(routeId)) {
-                routes.remove(route);
+                Node<Route> node = new Node<>(route);
+                routes.delete(node.value);
                 return;
             }
         }
@@ -77,26 +78,35 @@ public class NavigatorImpl implements Navigator {
         }
     }
 
-    @Override
-    public Iterable<Route> searchRoutes(String startPoint, String endPoint) {
-        List<Route> result = new ArrayList<>();
-        for (Route route : routes) {
-            List<String> locationPoints = route.getLocationPoints();
-            if (locationPoints.contains(startPoint) && locationPoints.contains(endPoint)) {
-                result.add(route);
-            }
-        }
-        result.sort(Comparator.<Route, Boolean>comparing(Route::isFavorite).reversed()
-                .thenComparing(Comparator.comparingInt(route -> route.getLocationPoints().size())).reversed()
-                .thenComparingDouble(Route::getDistance)
-                .thenComparingInt(Route::getPopularity).reversed());
-
-        return result;
-    }
+//    @Override
+//    public Iterable<Route> searchRoutes(String startPoint, String endPoint) {
+//        MyTreeSet<Route> resultFavorite = new MyTreeSet<>();
+//        MyTreeSet<Route> resultUnfavorite = new MyTreeSet<>();
+//        for (Route route : routes) {
+//            List<String> locationPoints = route.getLocationPoints();
+//            if (locationPoints.contains(startPoint) && locationPoints.contains(endPoint)) {
+//                resultFavorite.add(route);
+//            }
+//            else {
+//                resultUnfavorite.add(route);
+//            }
+//        }
+//        MyTreeSet<Route> sortedFavorite = new MyTreeSet<>(Comparator.<Route, Boolean>comparing(Route::isFavorite)
+//                .thenComparingDouble(Route::getDistance)
+//                .thenComparingInt(Route::getPopularity).reversed()
+//                .thenComparing(Comparator.comparingInt(route -> route.getLocationPoints().size())));
+//        MyTreeSet<Route> sortedUnfavorite = new MyTreeSet<>()
+//        for (Route route : sortedFavorite) {
+//            sortedFavorite.add(route);
+//        }
+//        resultFavorite = sortedFavorite;
+//        return resul;
+//        return ;
+//    }
 
     @Override
     public Iterable<Route> getFavoriteRoutes(String destinationPoint) {
-        List<Route> result = new ArrayList<>();
+        MyTreeSet<Route> result = new MyTreeSet<>();
         boolean routesAdded = false;
         System.out.println("Избранные маршруты");
         for (Route route : routes) {
@@ -118,21 +128,29 @@ public class NavigatorImpl implements Navigator {
 
     @Override
     public Iterable<Route> getTop3Routes() {
-        List<Route> result = new ArrayList<>();
+        MyTreeSet<Route> result = new MyTreeSet<>(Comparator.<Route, Integer>comparing(Route::getPopularity).reversed()
+                .thenComparingDouble(Route::getDistance)
+                .thenComparingInt(route -> route.getLocationPoints().size()));
         System.out.println("Топ 5 маршрутов:");
-        if (routes.isEmpty()) {
+        for (Route route : routes) {
+            result.add(route);
+        }
+        if (result.isEmpty()) {
             System.out.println("Нет маршрутов подходящих под данную сортировку");
             return result;
         }
-        result.addAll(routes);
-        result.sort(Comparator.<Route, Integer>comparing(Route::getPopularity).reversed()
+        MyTreeSet<Route> top = new MyTreeSet<>(Comparator.<Route, Integer>comparing(Route::getPopularity).reversed()
                 .thenComparingDouble(Route::getDistance)
                 .thenComparingInt(route -> route.getLocationPoints().size()));
-        if (result.size() > 5) {
-            result = result.subList(0, 5);
+        Iterator<Route> iterator = result.iterator();
+        int count = 0;
+        while (iterator.hasNext() && count < 5) {
+            top.add(iterator.next());
+            count++;
         }
-        return result;
+        return top;
     }
+
 
     private boolean isRouteExist(Route route) {
         for (Route r : routes) {
