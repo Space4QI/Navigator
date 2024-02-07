@@ -78,35 +78,28 @@ public class NavigatorImpl implements Navigator {
         }
     }
 
-//    @Override
-//    public Iterable<Route> searchRoutes(String startPoint, String endPoint) {
-//        MyTreeSet<Route> resultFavorite = new MyTreeSet<>();
-//        MyTreeSet<Route> resultUnfavorite = new MyTreeSet<>();
-//        for (Route route : routes) {
-//            List<String> locationPoints = route.getLocationPoints();
-//            if (locationPoints.contains(startPoint) && locationPoints.contains(endPoint)) {
-//                resultFavorite.add(route);
-//            }
-//            else {
-//                resultUnfavorite.add(route);
-//            }
-//        }
-//        MyTreeSet<Route> sortedFavorite = new MyTreeSet<>(Comparator.<Route, Boolean>comparing(Route::isFavorite)
-//                .thenComparingDouble(Route::getDistance)
-//                .thenComparingInt(Route::getPopularity).reversed()
-//                .thenComparing(Comparator.comparingInt(route -> route.getLocationPoints().size())));
-//        MyTreeSet<Route> sortedUnfavorite = new MyTreeSet<>()
-//        for (Route route : sortedFavorite) {
-//            sortedFavorite.add(route);
-//        }
-//        resultFavorite = sortedFavorite;
-//        return resul;
-//        return ;
-//    }
+    @Override
+    public Iterable<Route> searchRoutes(String startPoint, String endPoint) {
+        MyTreeSet<Route> result = new MyTreeSet<>(Comparator.<Route, Boolean>comparing(Route::isFavorite)
+                .thenComparingDouble(Route::getDistance)
+                .thenComparingInt(Route::getPopularity).reversed()
+                .thenComparing(Comparator.comparingInt(route -> route.getLocationPoints().size())));
+
+        for (Route route : routes) {
+            List<String> locationPoints = route.getLocationPoints();
+            if (locationPoints.contains(startPoint) && locationPoints.contains(endPoint)) {
+                result.add(route);
+            }
+        }
+
+        return result;
+    }
 
     @Override
     public Iterable<Route> getFavoriteRoutes(String destinationPoint) {
-        MyTreeSet<Route> result = new MyTreeSet<>();
+        MyTreeSet<Route> result = new MyTreeSet<>(Comparator.<Route, Double>comparing(Route::getDistance).reversed()
+                .thenComparingInt(Route::getPopularity)
+                .reversed());
         boolean routesAdded = false;
         System.out.println("Избранные маршруты");
         for (Route route : routes) {

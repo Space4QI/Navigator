@@ -8,8 +8,8 @@ public class Main {
         Route route1 = new Route("1", 100.0, 3, true, Arrays.asList("CityA", "CityB", "CityC"));
         Route route2 = new Route("2", 150.0, 5, false, Arrays.asList("CityA", "CityD", "CityE", "CityF", "CityC"));
         Route route3 = new Route("3", 80.0, 2, false, Arrays.asList("CityA", "CityC"));
-        Route route4 = new Route("4", 200.0, 4, true, Arrays.asList("CityG", "CityH", "CityI", "CityC"));
-        Route route5 = new Route("5", 900.0, 3, true, Arrays.asList("CityA", "CityC"));
+        Route route4 = new Route("4", 200.0, 4, true, Arrays.asList("CityA", "CityH", "CityI", "CityC"));
+        Route route5 = new Route("5", 130.0, 3, true, Arrays.asList("CityA", "CityC"));
         Route route6 = new Route("6", 300.0, 5, true, Arrays.asList("CityA", "CityH", "CityC"));
 
         navigator.addRoute(route1);
@@ -149,10 +149,10 @@ public class Main {
         System.out.println("Введите конечную точку");
         String endPoint = scanner.nextLine();
         System.out.println("Результат");
-        //Iterable<Route> search = navigator.searchRoutes(startPoint, endPoint);
-//        for (Route route : search) {
-//            navigator.informationRoute(route);
-//        }
+        Iterable<Route> search = navigator.searchRoutes(startPoint, endPoint);
+        for (Route route : search) {
+            navigator.informationRoute(route);
+        }
     }
 
     public static void showFavoriteRoutes(Scanner scanner, Navigator navigator) {
