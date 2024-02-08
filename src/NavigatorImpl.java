@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -80,26 +81,25 @@ public class NavigatorImpl implements Navigator {
 
     @Override
     public Iterable<Route> searchRoutes(String startPoint, String endPoint) {
-        MyTreeSet<Route> result = new MyTreeSet<>(Comparator.<Route, Boolean>comparing(Route::isFavorite)
-                .thenComparingDouble(Route::getDistance)
-                .thenComparingInt(Route::getPopularity).reversed()
-                .thenComparing(Comparator.comparingInt(route -> route.getLocationPoints().size())));
-
+        MyArrayList<Route> result = new MyArrayList<>();
         for (Route route : routes) {
             List<String> locationPoints = route.getLocationPoints();
             if (locationPoints.contains(startPoint) && locationPoints.contains(endPoint)) {
                 result.add(route);
             }
         }
+        result.sort(Comparator.<Route, Boolean>comparing(Route::isFavorite)
+                .thenComparingDouble(Route::getDistance).reversed()
+                .thenComparing(Comparator.comparingInt(route -> route.getLocationPoints().size())).reversed()
+                .thenComparingInt(Route::getPopularity).reversed()
+        );
 
         return result;
     }
 
     @Override
     public Iterable<Route> getFavoriteRoutes(String destinationPoint) {
-        MyTreeSet<Route> result = new MyTreeSet<>(Comparator.<Route, Double>comparing(Route::getDistance).reversed()
-                .thenComparingInt(Route::getPopularity)
-                .reversed());
+        MyArrayList<Route> result = new MyArrayList<>();
         boolean routesAdded = false;
         System.out.println("Избранные маршруты");
         for (Route route : routes) {
@@ -121,28 +121,28 @@ public class NavigatorImpl implements Navigator {
 
     @Override
     public Iterable<Route> getTop3Routes() {
-        MyTreeSet<Route> result = new MyTreeSet<>(Comparator.<Route, Integer>comparing(Route::getPopularity).reversed()
-                .thenComparingDouble(Route::getDistance)
-                .thenComparingInt(route -> route.getLocationPoints().size()));
+        MyArrayList<Route> result = new MyArrayList<>();
         System.out.println("Топ 5 маршрутов:");
-        for (Route route : routes) {
-            result.add(route);
-        }
-        if (result.isEmpty()) {
+        if (routes.isEmpty()) {
             System.out.println("Нет маршрутов подходящих под данную сортировку");
             return result;
         }
-        MyTreeSet<Route> top = new MyTreeSet<>(Comparator.<Route, Integer>comparing(Route::getPopularity).reversed()
+        for (Route route : routes) {
+            result.add(route);
+        }
+        result.sort(Comparator.<Route>comparingInt(Route::getPopularity).reversed()
                 .thenComparingDouble(Route::getDistance)
                 .thenComparingInt(route -> route.getLocationPoints().size()));
+
+        MyArrayList<Route> fiveRoutes = new MyArrayList<>();
         Iterator<Route> iterator = result.iterator();
-        int count = 0;
-        while (iterator.hasNext() && count < 5) {
-            top.add(iterator.next());
-            count++;
+        for (int i = 0; i < 5 && iterator.hasNext(); i++) {
+            fiveRoutes.add(iterator.next());
         }
-        return top;
+
+        return fiveRoutes;
     }
+
 
 
     private boolean isRouteExist(Route route) {
